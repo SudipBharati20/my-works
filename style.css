@@ -1,0 +1,345 @@
+/* =============================================
+   NEB Class 10 Science Question Bank
+   style.css
+   ============================================= */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f5f5f5;
+  --color-text: #111111;
+  --color-text-muted: #555555;
+  --color-border: #dddddd;
+  --color-border-strong: #111111;
+  --font-sans: 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'Courier New', monospace;
+  --radius: 2px;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ---- Layout ---- */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+/* ---- Header ---- */
+.header {
+  border-bottom: 2px solid var(--color-border-strong);
+  padding-bottom: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+.header p {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+/* ---- Unit Navigation ---- */
+.units-nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.unit-btn {
+  padding: 7px 16px;
+  border: 1px solid var(--color-border-strong);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: background 0.15s, color 0.15s;
+}
+
+.unit-btn:hover:not(.active):not(.locked) {
+  background: var(--color-bg-secondary);
+}
+
+.unit-btn.active {
+  background: var(--color-border-strong);
+  color: var(--color-bg);
+}
+
+.unit-btn.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- Lessons Navigation ---- */
+.lessons-nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1rem;
+}
+
+.lesson-btn {
+  padding: 4px 14px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: border-color 0.15s;
+}
+
+.lesson-btn:hover {
+  border-color: var(--color-border-strong);
+}
+
+.lesson-btn.active {
+  border-color: var(--color-border-strong);
+  font-weight: 600;
+}
+
+/* ---- Marks Tabs ---- */
+.marks-tabs {
+  display: flex;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-border-strong);
+  width: fit-content;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.marks-tab {
+  padding: 7px 20px;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.marks-tab + .marks-tab {
+  border-left: 1px solid var(--color-border-strong);
+}
+
+.marks-tab:hover:not(.active) {
+  background: var(--color-bg-secondary);
+}
+
+.marks-tab.active {
+  background: var(--color-border-strong);
+  color: var(--color-bg);
+}
+
+/* ---- Stats Row ---- */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: var(--color-bg-secondary);
+  padding: 12px 16px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+}
+
+.stat-card .label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card .value {
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ---- Question List ---- */
+.q-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.q-item {
+  border-bottom: 1px solid var(--color-border);
+  padding: 1rem 0;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.q-item:first-child {
+  border-top: 1px solid var(--color-border);
+}
+
+.q-item:hover {
+  background: #fafafa;
+  padding-left: 6px;
+  transition: padding 0.1s;
+}
+
+.q-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.q-num {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  min-width: 22px;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.q-text {
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+  line-height: 1.55;
+}
+
+.q-toggle {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  padding: 2px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  white-space: nowrap;
+  flex-shrink: 0;
+  user-select: none;
+  transition: background 0.1s;
+}
+
+.q-item:hover .q-toggle {
+  background: var(--color-bg-secondary);
+}
+
+/* ---- Year Tags ---- */
+.q-year-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 7px;
+  margin-left: 34px;
+}
+
+.q-year-tag {
+  font-size: 10px;
+  border: 1px solid var(--color-border);
+  padding: 1px 7px;
+  border-radius: 2px;
+  color: var(--color-text-muted);
+  background: var(--color-bg-secondary);
+}
+
+/* ---- Answer Block ---- */
+.q-answer {
+  margin-top: 14px;
+  margin-left: 34px;
+  background: var(--color-bg-secondary);
+  padding: 14px 18px;
+  border-left: 3px solid var(--color-border-strong);
+  font-size: 13px;
+  line-height: 1.8;
+  border-radius: 0 3px 3px 0;
+}
+
+.q-answer .ans-label {
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 12px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.q-answer .ans-label:first-child {
+  margin-top: 0;
+}
+
+.q-answer .ans-point {
+  padding-left: 16px;
+  position: relative;
+  margin-bottom: 5px;
+}
+
+.q-answer .ans-point::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  top: 3px;
+}
+
+.q-answer .formula {
+  font-family: var(--font-mono);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  padding: 6px 12px;
+  border-radius: 2px;
+  font-size: 12px;
+  margin: 6px 0;
+  display: block;
+}
+
+/* ---- Coming Soon ---- */
+.coming-soon {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  border: 1px dashed var(--color-border);
+  border-radius: 6px;
+  margin-top: 1rem;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 600px) {
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .marks-tabs {
+    width: 100%;
+  }
+
+  .marks-tab {
+    flex: 1;
+    text-align: center;
+  }
+
+  .header h1 {
+    font-size: 18px;
+  }
+}
