@@ -1,0 +1,1061 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#0a2f1f;color:#fff;min-height:100vh}
+.app{min-height:100vh;display:flex;flex-direction:column}
+.nav{background:#071f15;border-bottom:2px solid #FFD700;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.nav-brand{font-family:'Oswald',sans-serif;font-size:22px;color:#FFD700;letter-spacing:1px}
+.nav-right{display:flex;align-items:center;gap:12px}
+.pts-badge{background:#1a3d2b;border:1px solid #FFD700;color:#FFD700;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600}
+.btn-home{background:transparent;border:1px solid #22c55e;color:#22c55e;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif}
+.btn-home:hover{background:#22c55e;color:#fff}
+.main{flex:1;padding:1rem}
+/* LOBBY */
+.lobby-title{font-family:'Oswald',sans-serif;font-size:32px;color:#FFD700;text-align:center;margin:1.5rem 0 0.5rem}
+.lobby-sub{text-align:center;color:#86efac;margin-bottom:1.5rem;font-size:14px}
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;max-width:900px;margin:0 auto}
+.game-card{background:#1a3d2b;border:1px solid #2d5a3f;border-radius:12px;padding:1.25rem;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;gap:8px}
+.game-card:hover{border-color:#FFD700;transform:translateY(-2px);box-shadow:0 4px 20px rgba(255,215,0,0.15)}
+.game-icon{font-size:32px}
+.game-title{font-family:'Oswald',sans-serif;font-size:18px;color:#FFD700}
+.game-desc{font-size:13px;color:#86efac;line-height:1.5}
+.btn-play{margin-top:auto;background:#22c55e;color:#fff;border:none;padding:8px 0;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;font-family:'Inter',sans-serif;transition:background 0.2s}
+.btn-play:hover{background:#16a34a}
+/* STATS */
+.stats-card{background:#1a3d2b;border:1px solid #2d5a3f;border-radius:12px;padding:1rem;max-width:900px;margin:0 auto 1.25rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.stat-item{text-align:center}
+.stat-val{font-family:'Oswald',sans-serif;font-size:24px;color:#FFD700}
+.stat-lbl{font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:0.5px}
+/* GAME WRAPPER */
+.game-wrap{max-width:900px;margin:0 auto}
+.game-header{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem}
+.game-header h2{font-family:'Oswald',sans-serif;font-size:24px;color:#FFD700}
+/* BUTTONS */
+.btn{padding:8px 18px;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;border:none;transition:all 0.15s}
+.btn-green{background:#22c55e;color:#fff}.btn-green:hover{background:#16a34a}
+.btn-red{background:#ef4444;color:#fff}.btn-red:hover{background:#dc2626}
+.btn-gold{background:#FFD700;color:#1a3d2b}.btn-gold:hover{background:#eab308}
+.btn-outline{background:transparent;border:1px solid #86efac;color:#86efac}.btn-outline:hover{background:#86efac;color:#071f15}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+/* GRID GAME */
+.grid-table{width:100%;border-collapse:collapse;background:#1a3d2b;border-radius:12px;overflow:hidden}
+.grid-table th,.grid-table td{border:1px solid #2d5a3f;padding:8px;text-align:center}
+.grid-table th{background:#071f15;font-size:12px;color:#FFD700}
+.grid-cell{cursor:pointer;min-height:60px;font-size:12px;transition:all 0.2s;background:#1a3d2b}
+.grid-cell:hover{background:#2d5a3f}
+.grid-cell.correct{background:#14532d;color:#86efac;cursor:default}
+.grid-cell.failed{background:#450a0a;color:#fca5a5;cursor:default}
+.grid-cell.active{background:#2d5a3f;outline:2px solid #FFD700}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:200;padding:1rem}
+.modal{background:#1a3d2b;border:1px solid #FFD700;border-radius:12px;padding:1.5rem;width:100%;max-width:420px}
+.modal h3{font-family:'Oswald',sans-serif;font-size:20px;color:#FFD700;margin-bottom:1rem}
+.modal input{width:100%;background:#071f15;border:1px solid #2d5a3f;color:#fff;padding:10px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;margin-bottom:0.75rem}
+.modal input:focus{outline:none;border-color:#22c55e}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+/* QUIZ */
+.quiz-opt{width:100%;text-align:left;background:#1a3d2b;border:1px solid #2d5a3f;color:#fff;padding:12px 16px;border-radius:8px;cursor:pointer;font-size:14px;font-family:'Inter',sans-serif;transition:all 0.15s;margin-bottom:8px}
+.quiz-opt:hover:not(:disabled){background:#2d5a3f;border-color:#22c55e}
+.quiz-opt.correct{background:#14532d;border-color:#22c55e}
+.quiz-opt.wrong{background:#450a0a;border-color:#ef4444}
+.quiz-opt.reveal{background:#14532d;border-color:#22c55e}
+.quiz-opt:disabled{cursor:not-allowed}
+.timer-bar-wrap{height:6px;background:#071f15;border-radius:3px;margin-bottom:1rem;overflow:hidden}
+.timer-bar{height:100%;background:#22c55e;border-radius:3px;transition:width 0.1s linear}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-easy{background:#14532d;color:#86efac}
+.badge-med{background:#78350f;color:#fcd34d}
+.badge-hard{background:#450a0a;color:#fca5a5}
+.badge-cat{background:#1e3a5f;color:#93c5fd}
+/* PITCH */
+.pitch{background:linear-gradient(180deg,#166534 0%,#15803d 25%,#166534 50%,#15803d 75%,#166534 100%);border:2px solid #86efac;border-radius:8px;position:relative;padding:1rem;min-height:420px}
+.pitch::before{content:'';position:absolute;top:50%;left:10%;right:10%;height:1px;background:rgba(255,255,255,0.3)}
+.pitch::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px;border-radius:50%;border:1px solid rgba(255,255,255,0.3)}
+.pitch-row{display:flex;justify-content:center;gap:8px;margin:6px 0;position:relative;z-index:1}
+.player-slot{width:72px;text-align:center;cursor:pointer}
+.player-slot .slot-circle{width:44px;height:44px;border-radius:50%;background:#071f15;border:2px solid #2d5a3f;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 3px;transition:all 0.2s}
+.player-slot.filled .slot-circle{background:#1a3d2b;border-color:#22c55e}
+.player-slot.captain .slot-circle{border-color:#FFD700}
+.player-slot.vice .slot-circle{border-color:#93c5fd}
+.player-slot .slot-name{font-size:9px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72px}
+.player-slot .slot-pos{font-size:9px;color:#86efac}
+.player-list{background:#071f15;border-radius:8px;overflow-y:auto;max-height:340px}
+.player-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid #1a3d2b;cursor:pointer;transition:background 0.1s}
+.player-row:hover{background:#1a3d2b}
+.player-row.selected{opacity:0.4;cursor:not-allowed}
+.player-info-name{font-size:13px;font-weight:500}
+.player-info-meta{font-size:11px;color:#86efac}
+.player-price{font-size:12px;color:#FFD700;font-weight:600}
+/* HINTS */
+.hint-card{background:#071f15;border:1px solid #2d5a3f;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;animation:fadeIn 0.4s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.hint-num{background:#1a3d2b;color:#FFD700;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.hint-text{font-size:13px;line-height:1.5}
+/* BLUR CREST */
+.crest-wrap{display:flex;justify-content:center;margin:1rem 0}
+.crest-svg{transition:filter 1s}
+/* CONFETTI */
+@keyframes confetti-fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(200px) rotate(720deg);opacity:0}}
+.confetti-piece{position:absolute;width:8px;height:8px;animation:confetti-fall 1.5s ease-in forwards}
+/* TRANSFER */
+.transfer-chain{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:1rem 0}
+.transfer-club{background:#1a3d2b;border:1px solid #2d5a3f;border-radius:6px;padding:6px 10px;font-size:12px}
+.transfer-club.hidden{background:#2d5a3f;border-style:dashed;color:#86efac;font-style:italic}
+.transfer-arrow{color:#FFD700;font-size:14px}
+/* LEADERBOARD */
+.lb-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;background:#071f15;margin-bottom:6px}
+.lb-rank{font-family:'Oswald',sans-serif;font-size:18px;color:#86efac;width:28px}
+.lb-name{font-size:13px;font-weight:500;flex:1;margin:0 10px}
+.lb-pts{font-family:'Oswald',sans-serif;font-size:16px;color:#FFD700}
+.lb-row.me{border:1px solid #22c55e}
+input.game-input{width:100%;background:#071f15;border:1px solid #2d5a3f;color:#fff;padding:10px 14px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;margin-bottom:0.5rem}
+input.game-input:focus{outline:none;border-color:#22c55e}
+select.game-select{background:#071f15;border:1px solid #2d5a3f;color:#fff;padding:8px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer}
+select.game-select:focus{outline:none;border-color:#22c55e}
+.result-modal{background:#071f15;border:2px solid #FFD700;border-radius:16px;padding:2rem;text-align:center}
+.result-modal h2{font-family:'Oswald',sans-serif;font-size:28px;color:#FFD700;margin-bottom:0.5rem}
+.score-big{font-family:'Oswald',sans-serif;font-size:48px;color:#22c55e}
+.flex{display:flex}.gap-2{gap:8px}.gap-3{gap:12px}.items-center{align-items:center}.justify-between{justify-content:space-between}.flex-wrap{flex-wrap:wrap}
+.mb-1{margin-bottom:6px}.mb-2{margin-bottom:12px}.mb-3{margin-bottom:1rem}.mt-1{margin-top:6px}.mt-2{margin-top:12px}.mt-3{margin-top:1rem}
+.text-gold{color:#FFD700}.text-green{color:#22c55e}.text-red{color:#ef4444}.text-muted{color:#86efac}
+.text-sm{font-size:13px}.text-xs{font-size:11px}.text-lg{font-size:18px}.text-xl{font-size:22px}
+.fw-bold{font-weight:700}.fw-semi{font-weight:600}
+.w-full{width:100%}.text-center{text-align:center}
+.p-1{padding:6px}.p-2{padding:12px}.p-3{padding:1rem}
+.rounded{border-radius:8px}.rounded-lg{border-radius:12px}
+.bg-dark{background:#071f15}.bg-card{background:#1a3d2b}
+.border-green{border:1px solid #2d5a3f}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.info-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #1a3d2b;font-size:13px}
+.info-row:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const {useState,useEffect,useRef,useCallback,useMemo}=React;
+
+// ─── DATA ───────────────────────────────────────────────────────────────
+const PLAYERS_GRID=[
+  {name:"Zlatan Ibrahimovic",clubs:["Ajax","Juventus","Inter Milan","Barcelona","AC Milan","PSG","Manchester United","LA Galaxy"]},
+  {name:"Carlos Tevez",clubs:["West Ham","Manchester United","Manchester City","Juventus","Boca Juniors"]},
+  {name:"Samuel Eto'o",clubs:["Barcelona","Inter Milan","Chelsea","Anzhi","Everton"]},
+  {name:"Romelu Lukaku",clubs:["Chelsea","West Brom","Everton","Manchester United","Inter Milan","Juventus","AS Roma"]},
+  {name:"Thierry Henry",clubs:["Arsenal","Barcelona","New York Red Bulls"]},
+  {name:"Didier Drogba",clubs:["Chelsea","Galatasaray","Shanghai Shenhua","Montreal Impact"]},
+  {name:"David Silva",clubs:["Valencia","Manchester City"]},
+  {name:"Cesc Fabregas",clubs:["Arsenal","Barcelona","Chelsea","Monaco","Como"]},
+  {name:"Alexis Sanchez",clubs:["Arsenal","Manchester United","Inter Milan","Marseille"]},
+  {name:"Henrikh Mkhitaryan",clubs:["Borussia Dortmund","Manchester United","Arsenal","AS Roma","Inter Milan"]},
+  {name:"Diego Forlan",clubs:["Manchester United","Atletico Madrid","Inter Milan","Villarreal"]},
+  {name:"Juan Sebastian Veron",clubs:["Manchester United","Chelsea","Inter Milan","Lazio","Juventus"]},
+  {name:"Nicolas Anelka",clubs:["Arsenal","Real Madrid","PSG","Manchester City","Chelsea","Bolton","Liverpool"]},
+  {name:"Patrick Kluivert",clubs:["Ajax","Barcelona","Newcastle","Valencia","PSG"]},
+  {name:"Bixente Lizarazu",clubs:["Bayern Munich","Athletic Bilbao","Bordeaux"]},
+  {name:"Emmanuel Petit",clubs:["Arsenal","Barcelona","Chelsea","Monaco"]},
+  {name:"Marc Overmars",clubs:["Arsenal","Barcelona","Ajax"]},
+  {name:"Roberto Carlos",clubs:["Real Madrid","Inter Milan","Fenerbahce","Corinthians"]},
+  {name:"Hernan Crespo",clubs:["Chelsea","Inter Milan","AC Milan","Lazio","Parma"]},
+  {name:"Andrei Shevchenko",clubs:["AC Milan","Chelsea","Dynamo Kyiv"]},
+  {name:"Robinho",clubs:["Real Madrid","Manchester City","AC Milan","Santos","Atletico Mineiro"]},
+  {name:"Robben",clubs:["PSV","Chelsea","Real Madrid","Bayern Munich"]},
+  {name:"Ribery",clubs:["Marseille","Bayern Munich","Fiorentina"]},
+  {name:"Vidal",clubs:["Juventus","Bayern Munich","Barcelona","Inter Milan","Flamengo"]},
+  {name:"Pogba",clubs:["Manchester United","Juventus","PSG"]},
+  {name:"Higuain",clubs:["Real Madrid","Napoli","Juventus","AC Milan","Chelsea","Inter Miami"]},
+  {name:"Neymar",clubs:["Barcelona","PSG","Santos","Al-Hilal"]},
+  {name:"Suarez",clubs:["Liverpool","Barcelona","Atletico Madrid","Nacional","Ajax","Inter Miami"]},
+  {name:"Benzema",clubs:["Real Madrid","Lyon","Al-Ittihad"]},
+  {name:"Dybala",clubs:["Juventus","AS Roma","Palermo"]},
+  {name:"Cavani",clubs:["PSG","Manchester United","Napoli","Palermo","Atletico Madrid","Boca Juniors"]},
+  {name:"Mane",clubs:["Liverpool","Bayern Munich","Senegal","Al-Nassr","Southampton","Red Bull Salzburg"]},
+  {name:"Hazard",clubs:["Chelsea","Real Madrid","Lille"]},
+  {name:"De Bruyne",clubs:["Manchester City","Wolfsburg","Chelsea","Genk"]},
+  {name:"Son",clubs:["Tottenham","Bayer Leverkusen","Hamburg"]},
+];
+const CLUBS_GRID=["Manchester United","Manchester City","Chelsea","Arsenal","Liverpool","Barcelona","Real Madrid","Juventus","Inter Milan","AC Milan","PSG","Bayern Munich","Atletico Madrid","Ajax","Borussia Dortmund"];
+
+const QUIZ_QUESTIONS=[
+  {q:"Which country won the first FIFA World Cup in 1930?",opts:["Brazil","Uruguay","Argentina","Italy"],a:1,cat:"Tournaments",diff:"Easy",exp:"Uruguay hosted and won the inaugural World Cup in 1930, defeating Argentina 4-2 in the final."},
+  {q:"Who holds the record for most goals in a single World Cup tournament?",opts:["Ronaldo","Pele","Just Fontaine","Gerd Muller"],a:2,cat:"Records",diff:"Hard",exp:"Just Fontaine scored 13 goals for France at the 1958 World Cup — a record that still stands today."},
+  {q:"Which club has won the most UEFA Champions League titles?",opts:["Barcelona","Bayern Munich","Real Madrid","AC Milan"],a:2,cat:"Tournaments",diff:"Easy",exp:"Real Madrid have won the Champions League/European Cup a record 15 times."},
+  {q:"Who scored the 'Hand of God' goal?",opts:["Pele","Ronaldo","Maradona","Zidane"],a:2,cat:"History",diff:"Easy",exp:"Diego Maradona scored with his hand against England in the 1986 World Cup quarter-final, calling it 'the Hand of God'."},
+  {q:"Which player has won the most Ballon d'Or awards?",opts:["Cristiano Ronaldo","Zinedine Zidane","Ronaldinho","Lionel Messi"],a:3,cat:"Players",diff:"Easy",exp:"Lionel Messi has won 8 Ballon d'Or awards (2009,2010,2011,2012,2015,2019,2021,2023)."},
+  {q:"What is the maximum number of substitutions allowed in a standard FIFA match?",opts:["3","4","5","6"],a:2,cat:"Rules",diff:"Medium",exp:"FIFA increased the limit to 5 substitutions in 2020, with a 6th allowed in extra time."},
+  {q:"Which country has won the most FIFA World Cups?",opts:["Germany","Italy","Brazil","Argentina"],a:2,cat:"Tournaments",diff:"Easy",exp:"Brazil have won the World Cup 5 times: 1958, 1962, 1970, 1994, 2002."},
+  {q:"Who is the all-time top scorer in the UEFA Champions League?",opts:["Messi","Ronaldo","Benzema","Raul"],a:1,cat:"Records",diff:"Easy",exp:"Cristiano Ronaldo is the all-time top scorer in the Champions League with 140 goals."},
+  {q:"In what year was the Premier League founded?",opts:["1988","1990","1992","1995"],a:2,cat:"History",diff:"Medium",exp:"The Premier League was founded in 1992, replacing the old First Division."},
+  {q:"Which player is known as 'El Pibe de Oro' (The Golden Boy)?",opts:["Ronaldo","Pele","Maradona","Zidane"],a:2,cat:"Players",diff:"Medium",exp:"Diego Maradona was nicknamed El Pibe de Oro due to his extraordinary talent from a young age."},
+  {q:"What is the size of a standard football pitch (length)?",opts:["90-120m","80-110m","100-130m","70-100m"],a:0,cat:"Rules",diff:"Easy",exp:"FIFA regulations specify a pitch length of 90-120 metres and width of 45-90 metres."},
+  {q:"Which team won the first Premier League title?",opts:["Manchester United","Arsenal","Liverpool","Leeds United"],a:0,cat:"History",diff:"Medium",exp:"Manchester United won the inaugural Premier League title in the 1992-93 season."},
+  {q:"Who was the first player to be sent off in a World Cup final?",opts:["Zinedine Zidane","Pedro Monzon","Marcel Desailly","Jose Batista"],a:1,cat:"History",diff:"Hard",exp:"Pedro Monzon of Argentina was sent off in the 1990 World Cup final — the first ever red card in a World Cup final."},
+  {q:"How many players are on the field in a standard football match?",opts:["20","22","24","18"],a:1,cat:"Rules",diff:"Easy",exp:"22 players are on the field: 11 from each team."},
+  {q:"Which country hosted the 2022 FIFA World Cup?",opts:["UAE","Saudi Arabia","Qatar","Bahrain"],a:2,cat:"Tournaments",diff:"Easy",exp:"Qatar hosted the 2022 FIFA World Cup — the first World Cup held in the Middle East."},
+  {q:"Who scored the winning goal in the 2014 World Cup final?",opts:["Messi","Podolski","Gotze","Muller"],a:2,cat:"Tournaments",diff:"Medium",exp:"Mario Gotze scored in extra time for Germany against Argentina to win the 2014 World Cup."},
+  {q:"Which club has won the most English league titles?",opts:["Liverpool","Arsenal","Chelsea","Manchester United"],a:3,cat:"Records",diff:"Medium",exp:"Manchester United have won 20 English league titles, more than any other club."},
+  {q:"What does the 'VAR' stand for in football?",opts:["Video Assistant Referee","Visual Assessment Review","Video Analysis Review","Video Assistance Recording"],a:0,cat:"Rules",diff:"Easy",exp:"VAR stands for Video Assistant Referee, a technology used to review decisions made by the head referee."},
+  {q:"Who managed Barcelona during their famous treble-winning 2008-09 season?",opts:["Louis van Gaal","Johan Cruyff","Pep Guardiola","Frank Rijkaard"],a:2,cat:"History",diff:"Medium",exp:"Pep Guardiola managed Barcelona in his debut season and won La Liga, Copa del Rey, and the Champions League."},
+  {q:"Which nation did Lev Yashin, widely considered the greatest goalkeeper ever, represent?",opts:["Russia","Czechoslovakia","Soviet Union","East Germany"],a:2,cat:"Players",diff:"Hard",exp:"Lev Yashin played for the Soviet Union and won the Ballon d'Or in 1963 — the only goalkeeper ever to do so."},
+  {q:"What year did Cristiano Ronaldo win his first Ballon d'Or?",opts:["2006","2008","2009","2010"],a:1,cat:"Players",diff:"Medium",exp:"Cristiano Ronaldo won his first Ballon d'Or in 2008 after a sensational season with Manchester United."},
+  {q:"Which club did Ronaldinho play for before Barcelona?",opts:["Santos","Gremio","PSG","Flamengo"],a:2,cat:"Players",diff:"Medium",exp:"Ronaldinho joined Barcelona from PSG in 2003 for €30 million."},
+  {q:"How long is each half in a standard football match?",opts:["40 mins","45 mins","50 mins","55 mins"],a:1,cat:"Rules",diff:"Easy",exp:"Each half is 45 minutes, making the standard match 90 minutes, plus added time."},
+  {q:"Who scored a hat-trick in the 2018 World Cup final?",opts:["Griezmann","Mbappe","Giroud","Pogba"],a:0,cat:"Tournaments",diff:"Hard",exp:"Antoine Griezmann scored two goals in France's 4-2 victory over Croatia in the 2018 World Cup final."},
+  {q:"Which striker is nicknamed 'The Phenomenon'?",opts:["Cristiano Ronaldo","Ronaldo Nazario","Ronaldinho","Rooney"],a:1,cat:"Players",diff:"Easy",exp:"Ronaldo Nazario is nicknamed O Fenomeno (The Phenomenon) for his extraordinary speed and finishing."},
+];
+
+const PLAYERS_GUESS=[
+  {name:"Cristiano Ronaldo",pos:"Forward",nat:"Portugal",club:"Al-Nassr",age:39,shirt:7,trophies:["5x Champions League","5x Ballon d'Or","7x league titles"],value:"€20M",fact:"First player to score 900 career goals"},
+  {name:"Lionel Messi",pos:"Forward",nat:"Argentina",club:"Inter Miami",age:36,shirt:10,trophies:["4x Champions League","8x Ballon d'Or","World Cup 2022"],value:"€35M",fact:"Only player to win 8 Ballon d'Or awards"},
+  {name:"Kylian Mbappe",pos:"Forward",nat:"France",club:"Real Madrid",age:25,shirt:9,trophies:["2x Ligue 1","World Cup 2018","Champions League 2024"],value:"€180M",fact:"Youngest French player to score at a World Cup"},
+  {name:"Erling Haaland",pos:"Forward",nat:"Norway",club:"Manchester City",age:23,shirt:9,trophies:["Premier League","Champions League","3x Bundesliga"],value:"€200M",fact:"Scored 97 Bundesliga goals in just 89 appearances at record pace"},
+  {name:"Vinicius Junior",pos:"Forward",nat:"Brazil",club:"Real Madrid",age:23,shirt:7,trophies:["2x Champions League","2x La Liga"],value:"€180M",fact:"Won the Ballon d'Or in 2024, ending Messi-Ronaldo era"},
+  {name:"Lamine Yamal",pos:"Forward",nat:"Spain",club:"Barcelona",age:17,shirt:19,trophies:["Euro 2024","La Liga 2024"],value:"€150M",fact:"Youngest player to score at a European Championship final"},
+  {name:"Pedri",pos:"Midfielder",nat:"Spain",club:"Barcelona",age:22,shirt:8,trophies:["Euro 2024","La Liga","Golden Boy 2021"],value:"€80M",fact:"Named best young player at both Euro 2020 and Copa America 2021"},
+  {name:"Phil Foden",pos:"Midfielder",nat:"England",club:"Manchester City",age:24,shirt:47,trophies:["3x Premier League","Champions League"],value:"€150M",fact:"Won the Premier League Player of the Season in 2023-24"},
+  {name:"Jude Bellingham",pos:"Midfielder",nat:"England",club:"Real Madrid",age:21,shirt:5,trophies:["Champions League 2024","Bundesliga"],value:"€180M",fact:"Scored on his La Liga debut and won Champions League in his first season"},
+  {name:"Gavi",pos:"Midfielder",nat:"Spain",club:"Barcelona",age:20,shirt:6,trophies:["Euro 2024","La Liga","Golden Boy 2022"],value:"€70M",fact:"Signed his first professional contract at age 11 with Barcelona's academy"},
+  {name:"Mohamed Salah",pos:"Forward",nat:"Egypt",club:"Liverpool",age:32,shirt:11,trophies:["Champions League","Premier League"],value:"€50M",fact:"Fastest player to score 100 Premier League goals (162 games)"},
+  {name:"Bukayo Saka",pos:"Forward",nat:"England",club:"Arsenal",age:22,shirt:7,trophies:["Euro 2024 runner-up"],value:"€120M",fact:"Arsenal's youngest ever player to score in the Europa League"},
+];
+
+const TEAMS_GUESS=[
+  {name:"Manchester United",alts:["Man United","Man Utd","MUFC"],nick:"The Red Devils",country:"England",league:"Premier League",founded:1878,stadium:"Old Trafford",cap:74000,colors:"Red and White",titles:{league:20,cl:3,facup:13},legends:["Charlton","Best","Cantona","Scholes","Giggs"],history:"Founded as Newton Heath in 1878, renamed Manchester United in 1902. Won the first European Cup treble in 1999.",color:"#DA020E"},
+  {name:"Barcelona",alts:["Barca","FCB","FC Barcelona"],nick:"Blaugrana / Barca",country:"Spain",league:"La Liga",founded:1899,stadium:"Camp Nou",cap:99354,colors:"Blue and Red",titles:{league:27,cl:5,copa:31},legends:["Cruyff","Messi","Xavi","Iniesta","Ronaldinho"],history:"Founded in 1899 by Joan Gamper. Famous for La Masia academy and tiki-taka football.",color:"#004D98"},
+  {name:"Real Madrid",alts:["Real","RMCF","Los Blancos"],nick:"Los Blancos",country:"Spain",league:"La Liga",founded:1902,stadium:"Santiago Bernabeu",cap:81044,colors:"White",titles:{league:36,cl:15,copa:20},legends:["Di Stefano","Raul","Ronaldo","Benzema","Zidane"],history:"Founded in 1902, Real Madrid are the most successful club in Champions League history with 15 titles.",color:"#FEBE10"},
+  {name:"Liverpool",alts:["LFC","The Reds"],nick:"The Reds",country:"England",league:"Premier League",founded:1892,stadium:"Anfield",cap:61000,colors:"Red",titles:{league:20,cl:6,facup:8},legends:["Dalglish","Rush","Gerrard","Owen","Suarez"],history:"Founded in 1892, Liverpool are one of England's most decorated clubs with 6 European Cups.",color:"#C8102E"},
+  {name:"Bayern Munich",alts:["Bayern","FCB","Die Roten"],nick:"Die Bayern",country:"Germany",league:"Bundesliga",founded:1900,stadium:"Allianz Arena",cap:75000,colors:"Red and White",titles:{league:32,cl:6,dfbpokal:20},legends:["Beckenbauer","Muller","Lahm","Ribery","Robben"],history:"Germany's most successful club, Bayern have won 32 Bundesliga titles and 6 European Cups.",color:"#DC052D"},
+  {name:"Juventus",alts:["Juve","The Old Lady"],nick:"The Old Lady",country:"Italy",league:"Serie A",founded:1897,stadium:"Allianz Stadium",cap:41507,colors:"Black and White",titles:{league:36,cl:2,coppa:14},legends:["Del Piero","Platini","Baggio","Zidane","Ronaldo"],history:"Founded in 1897, Juventus are Italy's most successful club with 36 Serie A titles.",color:"#000000"},
+  {name:"Arsenal",alts:["The Gunners","AFC"],nick:"The Gunners",country:"England",league:"Premier League",founded:1886,stadium:"Emirates Stadium",cap:60704,colors:"Red and White",titles:{league:13,cl:0,facup:14},legends:["Henry","Bergkamp","Adams","Pires","Vieira"],history:"Founded in 1886, Arsenal famously went unbeaten in the 2003-04 season, earning the title 'The Invincibles'.",color:"#EF0107"},
+  {name:"Chelsea",alts:["The Blues","CFC"],nick:"The Blues",country:"England",league:"Premier League",founded:1905,stadium:"Stamford Bridge",cap:40341,colors:"Blue",titles:{league:6,cl:2,facup:8},legends:["Zola","Lampard","Terry","Drogba","Hazard"],history:"Founded in 1905, Chelsea rose to elite status after Roman Abramovich's takeover in 2003.",color:"#034694"},
+  {name:"AC Milan",alts:["Milan","Rossoneri"],nick:"Rossoneri",country:"Italy",league:"Serie A",founded:1899,stadium:"San Siro",cap:75923,colors:"Red and Black",titles:{league:19,cl:7,coppa:5},legends:["Maldini","Gullit","Van Basten","Kaka","Shevchenko"],history:"Founded in 1899, AC Milan won 7 European Cups including three in the 1990s golden era.",color:"#FB090B"},
+  {name:"Atletico Madrid",alts:["Atleti","Atletico"],nick:"Los Colchoneros",country:"Spain",league:"La Liga",founded:1903,stadium:"Wanda Metropolitano",cap:68000,colors:"Red and White",titles:{league:11,cl:0,europa:3},legends:["Fernando Torres","Forlan","Falcao","Griezmann","Suarez"],history:"Founded in 1903, Atletico are known for their intensity and have been La Liga runners-up multiple times to their city rivals.",color:"#CB3524"},
+];
+
+const TRANSFER_CHAINS=[
+  {player:"Zlatan Ibrahimovic",clubs:[{c:"Malmo FF",y:"1999"},{c:"Ajax",y:"2001"},{c:"Juventus",y:"2004"},{c:"Inter Milan",y:"2006"},{c:"Barcelona",y:"2009"},{c:"AC Milan",y:"2010"},{c:"PSG",y:"2012"},{c:"Manchester United",y:"2016"},{c:"LA Galaxy",y:"2018"}],diff:"Easy"},
+  {player:"Carlos Tevez",clubs:[{c:"Boca Juniors",y:"2001"},{c:"Corinthians",y:"2005"},{c:"West Ham",y:"2006"},{c:"Manchester United",y:"2007"},{c:"Manchester City",y:"2009"},{c:"Juventus",y:"2013"},{c:"Boca Juniors",y:"2015"}],diff:"Easy"},
+  {player:"Nicolas Anelka",clubs:[{c:"Arsenal",y:"1997"},{c:"Real Madrid",y:"1999"},{c:"PSG",y:"2000"},{c:"Manchester City",y:"2002"},{c:"Fenerbahce",y:"2005"},{c:"Bolton",y:"2006"},{c:"Liverpool",y:"2006"},{c:"Chelsea",y:"2008"}],diff:"Medium"},
+  {player:"Robinho",clubs:[{c:"Santos",y:"2002"},{c:"Real Madrid",y:"2005"},{c:"Manchester City",y:"2008"},{c:"AC Milan",y:"2010"},{c:"Santos",y:"2012"},{c:"Atletico Mineiro",y:"2014"}],diff:"Medium"},
+  {player:"Diego Forlan",clubs:[{c:"Independiente",y:"1997"},{c:"Manchester United",y:"2002"},{c:"Villarreal",y:"2004"},{c:"Atletico Madrid",y:"2007"},{c:"Inter Milan",y:"2011"},{c:"Internacional",y:"2012"}],diff:"Hard"},
+];
+
+const D11_PLAYERS=[
+  {id:1,name:"Alisson",club:"Liverpool",nat:"Brazil",pos:"GK",rat:90,price:9,form:9,stat:"20 clean sheets"},
+  {id:2,name:"Ederson",club:"Man City",nat:"Brazil",pos:"GK",rat:88,price:9,form:8,stat:"17 clean sheets"},
+  {id:3,name:"Courtois",club:"Real Madrid",nat:"Belgium",pos:"GK",rat:89,price:9,form:7,stat:"Champions League winner"},
+  {id:4,name:"De Gea",club:"Free Agent",nat:"Spain",pos:"GK",rat:82,price:7,form:6,stat:"Golden Glove 2023"},
+  {id:5,name:"Pickford",club:"Everton",nat:"England",pos:"GK",rat:82,price:7,form:8,stat:"England #1"},
+  {id:6,name:"Alexander-Arnold",club:"Liverpool",nat:"England",pos:"DEF",rat:88,price:9,form:9,stat:"15 assists"},
+  {id:7,name:"Cancelo",club:"Barcelona",nat:"Portugal",pos:"DEF",rat:86,price:8,form:7,stat:"10 key passes"},
+  {id:8,name:"Virgil van Dijk",club:"Liverpool",nat:"Netherlands",pos:"DEF",rat:90,price:9,form:9,stat:"Most dribbles beaten"},
+  {id:9,name:"Ruben Dias",club:"Man City",nat:"Portugal",pos:"DEF",rat:89,price:9,form:8,stat:"Premier League winner"},
+  {id:10,name:"Theo Hernandez",club:"AC Milan",nat:"France",pos:"DEF",rat:87,price:8,form:8,stat:"12 goal contributions"},
+  {id:11,name:"Reece James",club:"Chelsea",nat:"England",pos:"DEF",rat:85,price:8,form:7,stat:"8 goals from RB"},
+  {id:12,name:"Achraf Hakimi",club:"PSG",nat:"Morocco",pos:"DEF",rat:87,price:8,form:8,stat:"Fastest full-back in game"},
+  {id:13,name:"Antonio Rudiger",club:"Real Madrid",nat:"Germany",pos:"DEF",rat:85,price:8,form:8,stat:"Champions League winner"},
+  {id:14,name:"Eder Militao",club:"Real Madrid",nat:"Brazil",pos:"DEF",rat:86,price:8,form:7,stat:"World Cup 2022"},
+  {id:15,name:"Kevin De Bruyne",club:"Man City",nat:"Belgium",pos:"MID",rat:92,price:11,form:9,stat:"18 assists this season"},
+  {id:16,name:"Jude Bellingham",club:"Real Madrid",nat:"England",pos:"MID",rat:91,price:11,form:10,stat:"Champions League winner"},
+  {id:17,name:"Pedri",club:"Barcelona",nat:"Spain",pos:"MID",rat:87,price:9,form:8,stat:"Best young player 2021"},
+  {id:18,name:"Gavi",club:"Barcelona",nat:"Spain",pos:"MID",rat:86,price:9,form:8,stat:"Euro 2024 winner"},
+  {id:19,name:"Toni Kroos",club:"Real Madrid",nat:"Germany",pos:"MID",rat:89,price:10,form:9,stat:"Champions League winner 2024"},
+  {id:20,name:"Luka Modric",club:"Real Madrid",nat:"Croatia",pos:"MID",rat:87,price:9,form:8,stat:"5x Champions League"},
+  {id:21,name:"Frenkie de Jong",club:"Barcelona",nat:"Netherlands",pos:"MID",rat:85,price:9,form:7,stat:"Key man in midfield"},
+  {id:22,name:"Phil Foden",club:"Man City",nat:"England",pos:"MID",rat:89,price:10,form:9,stat:"PL Player of the Season"},
+  {id:23,name:"Bruno Fernandes",club:"Man United",nat:"Portugal",pos:"MID",rat:87,price:10,form:8,stat:"18 goals this season"},
+  {id:24,name:"Bernardo Silva",club:"Man City",nat:"Portugal",pos:"MID",rat:88,price:10,form:9,stat:"Champions League winner"},
+  {id:25,name:"Declan Rice",club:"Arsenal",nat:"England",pos:"MID",rat:86,price:9,form:8,stat:"Record Arsenal signing"},
+  {id:26,name:"Rodri",club:"Man City",nat:"Spain",pos:"MID",rat:91,price:10,form:10,stat:"Ballon d'Or 2024"},
+  {id:27,name:"Erling Haaland",club:"Man City",nat:"Norway",pos:"FWD",rat:95,price:13,form:10,stat:"36 PL goals in a season"},
+  {id:28,name:"Kylian Mbappe",club:"Real Madrid",nat:"France",pos:"FWD",rat:94,price:13,form:9,stat:"All-time PSG top scorer"},
+  {id:29,name:"Mohamed Salah",club:"Liverpool",nat:"Egypt",pos:"FWD",rat:91,price:12,form:9,stat:"100 PL goals in 162 games"},
+  {id:30,name:"Vinicius Jr",club:"Real Madrid",nat:"Brazil",pos:"FWD",rat:92,price:12,form:9,stat:"Ballon d'Or 2024 winner"},
+  {id:31,name:"Bukayo Saka",club:"Arsenal",nat:"England",pos:"FWD",rat:88,price:11,form:9,stat:"Arsenal's top scorer"},
+  {id:32,name:"Marcus Rashford",club:"Man United",nat:"England",pos:"FWD",rat:84,price:10,form:7,stat:"30 goals in 22-23"},
+  {id:33,name:"Lamine Yamal",club:"Barcelona",nat:"Spain",pos:"FWD",rat:88,price:11,form:9,stat:"Youngest Euro scorer"},
+  {id:34,name:"Harry Kane",club:"Bayern Munich",nat:"England",pos:"FWD",rat:91,price:12,form:9,stat:"Bundesliga top scorer"},
+  {id:35,name:"Leroy Sane",club:"Bayern Munich",nat:"Germany",pos:"FWD",rat:85,price:10,form:7,stat:"Champions League winner"},
+  {id:36,name:"Son Heung-min",club:"Tottenham",nat:"South Korea",pos:"FWD",rat:86,price:10,form:8,stat:"Asian PL top scorer"},
+];
+
+const FORMATIONS={
+  "4-3-3":{gk:1,def:4,mid:3,fwd:3},
+  "4-4-2":{gk:1,def:4,mid:4,fwd:2},
+  "3-5-2":{gk:1,def:3,mid:5,fwd:2},
+  "4-2-3-1":{gk:1,def:4,mid:5,fwd:1},
+  "5-3-2":{gk:1,def:5,mid:3,fwd:2},
+};
+
+// ─── HELPERS ────────────────────────────────────────────────────────────
+function randFrom(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+// ─── COMPONENTS ─────────────────────────────────────────────────────────
+function App(){
+  const[screen,setScreen]=useState("lobby");
+  const[totalPts,setTotalPts]=useState(0);
+  const[gamesPlayed,setGamesPlayed]=useState(0);
+  const[streak,setStreak]=useState(0);
+
+  const addPts=useCallback((n)=>{setTotalPts(p=>p+n);setGamesPlayed(p=>p+1)},[]);
+
+  const MOCK_LB=[
+    {name:"FootballFanatic99",pts:3420},
+    {name:"GoalMachine",pts:2890},
+    {name:"TacticsGuru",pts:2340},
+    {name:"BallonDorFan",pts:1800},
+    {name:"UltrasFCB",pts:1250},
+  ];
+
+  const myRank=MOCK_LB.filter(l=>l.pts>totalPts).length+1;
+
+  return React.createElement("div",{className:"app"},
+    React.createElement("nav",{className:"nav"},
+      React.createElement("span",{className:"nav-brand"},"⚽ FootballZone"),
+      React.createElement("div",{className:"nav-right"},
+        React.createElement("span",{className:"pts-badge"},`⭐ ${totalPts} pts`),
+        screen!=="lobby"&&React.createElement("button",{className:"btn-home",onClick:()=>setScreen("lobby")},"🏠 Home")
+      )
+    ),
+    React.createElement("div",{className:"main"},
+      screen==="lobby"&&React.createElement(Lobby,{setScreen,totalPts,gamesPlayed,streak,myRank,MOCK_LB}),
+      screen==="grid"&&React.createElement(GridGame,{addPts,key:"grid"}),
+      screen==="dream11"&&React.createElement(Dream11,{addPts,key:"d11"}),
+      screen==="guess_player"&&React.createElement(GuessPlayer,{addPts,streak,setStreak,key:"gp"}),
+      screen==="guess_team"&&React.createElement(GuessTeam,{addPts,key:"gt"}),
+      screen==="quiz"&&React.createElement(Quiz,{addPts,key:"quiz"}),
+      screen==="transfer"&&React.createElement(TransferGame,{addPts,key:"transfer"}),
+    )
+  );
+}
+
+function Lobby({setScreen,totalPts,gamesPlayed,streak,myRank,MOCK_LB}){
+  const games=[
+    {id:"grid",icon:"🔢",title:"Football Grid",desc:"Find players who played for both clubs. Fill the 3×3 grid!"},
+    {id:"dream11",icon:"⚽",title:"Dream 11 Builder",desc:"Build your ultimate fantasy XI and score your team."},
+    {id:"guess_player",icon:"🤔",title:"Guess the Player",desc:"6 progressive hints to identify the mystery footballer."},
+    {id:"guess_team",icon:"🛡️",title:"Guess the Team",desc:"Reveal the blurred crest and identify the football club."},
+    {id:"quiz",icon:"🧠",title:"Football Quiz",desc:"Timed multiple-choice trivia on football history and records."},
+    {id:"transfer",icon:"✈️",title:"Transfer Puzzle",desc:"Identify a player from their club career transfer history."},
+  ];
+  return React.createElement("div",null,
+    React.createElement("h1",{className:"lobby-title"},"Welcome to FootballZone"),
+    React.createElement("p",{className:"lobby-sub"},"6 football games — compete, score points, and climb the leaderboard!"),
+    React.createElement("div",{className:"stats-card"},
+      React.createElement("div",{className:"stat-item"},React.createElement("div",{className:"stat-val"},totalPts),React.createElement("div",{className:"stat-lbl"},"Total Points")),
+      React.createElement("div",{className:"stat-item"},React.createElement("div",{className:"stat-val"},gamesPlayed),React.createElement("div",{className:"stat-lbl"},"Games Played")),
+      React.createElement("div",{className:"stat-item"},React.createElement("div",{className:"stat-val"},streak),React.createElement("div",{className:"stat-lbl"},"Best Streak")),
+      React.createElement("div",{className:"stat-item"},React.createElement("div",{className:"stat-val"},"#"+myRank),React.createElement("div",{className:"stat-lbl"},"Your Rank")),
+    ),
+    React.createElement("div",{className:"games-grid"},
+      games.map(g=>React.createElement("div",{key:g.id,className:"game-card"},
+        React.createElement("div",{className:"game-icon"},g.icon),
+        React.createElement("div",{className:"game-title"},g.title),
+        React.createElement("div",{className:"game-desc"},g.desc),
+        React.createElement("button",{className:"btn-play",onClick:()=>setScreen(g.id)},"▶ Play"),
+      ))
+    ),
+    React.createElement("div",{style:{maxWidth:900,margin:"1.25rem auto"}},
+      React.createElement("h3",{style:{fontFamily:"Oswald",color:"#FFD700",marginBottom:10,fontSize:18}},"🏆 Leaderboard"),
+      [...MOCK_LB,{name:"You ★",pts:totalPts,me:true}].sort((a,b)=>b.pts-a.pts).map((l,i)=>
+        React.createElement("div",{key:i,className:`lb-row${l.me?" me":""}` },
+          React.createElement("div",{className:"lb-rank"},`#${i+1}`),
+          React.createElement("div",{className:"lb-name"},l.name),
+          React.createElement("div",{className:"lb-pts"},l.pts+" pts"),
+        )
+      )
+    )
+  );
+}
+
+// ─── GRID GAME ──────────────────────────────────────────────────────────
+function GridGame({addPts}){
+  const[state,setState]=useState(()=>initGrid());
+  const[modal,setModal]=useState(null);// {r,c}
+  const[input,setInput]=useState("");
+  const[msg,setMsg]=useState("");
+  const[done,setDone]=useState(false);
+  const[timer,setTimer]=useState(0);
+
+  function initGrid(){
+    const allClubs=[...new Set(PLAYERS_GRID.flatMap(p=>p.clubs))];
+    const sc=shuffle(allClubs);
+    let rows=[],cols=[];
+    // pick 3 rows and 3 cols that have at least 1 valid intersection each
+    let tries=0;
+    while((rows.length<3||cols.length<3)&&tries<200){
+      tries++;
+      const r3=sc.slice(0,3);const c3=sc.slice(3,6);
+      let valid=true;
+      for(let r=0;r<3;r++)for(let c=0;c<3;c++){
+        const ok=PLAYERS_GRID.some(p=>p.clubs.includes(r3[r])&&p.clubs.includes(c3[c]));
+        if(!ok){valid=false;break}
+      }
+      if(valid){rows=r3;cols=c3;break}
+      sc.push(sc.shift());
+    }
+    if(!rows.length){rows=["Barcelona","Manchester United","Chelsea"];cols=["Inter Milan","PSG","Juventus"]}
+    const cells={};
+    for(let r=0;r<3;r++)for(let c=0;c<3;c++)cells[`${r},${c}`]={status:"empty",answer:"",attempts:0};
+    return{rows,cols,cells};
+  }
+
+  useEffect(()=>{
+    if(done)return;
+    const t=setInterval(()=>setTimer(p=>p+1),1000);
+    return()=>clearInterval(t);
+  },[done]);
+
+  useEffect(()=>{
+    const allFilled=Object.values(state.cells).every(c=>c.status!=="empty");
+    if(allFilled&&!done){
+      const correct=Object.values(state.cells).filter(c=>c.status==="correct").length;
+      addPts(correct*10);
+      setDone(true);
+    }
+  },[state.cells]);
+
+  function openCell(r,c){
+    const cell=state.cells[`${r},${c}`];
+    if(cell.status!=="empty")return;
+    setModal({r,c});setInput("");setMsg("");
+  }
+
+  function submitGuess(){
+    const{r,c}=modal;
+    const key=`${r},${c}`;
+    const rClub=state.rows[r];const cClub=state.cols[c];
+    const guess=input.trim().toLowerCase();
+    const match=PLAYERS_GRID.find(p=>
+      (p.name.toLowerCase().includes(guess)||guess.includes(p.name.toLowerCase().split(" ")[0].toLowerCase()))
+      &&p.clubs.includes(rClub)&&p.clubs.includes(cClub)
+    );
+    if(match){
+      setState(s=>({...s,cells:{...s.cells,[key]:{status:"correct",answer:match.name,attempts:s.cells[key].attempts+1}}}));
+      setModal(null);
+    } else {
+      const newAttempts=state.cells[key].attempts+1;
+      if(newAttempts>=3){
+        const reveal=PLAYERS_GRID.find(p=>p.clubs.includes(rClub)&&p.clubs.includes(cClub));
+        setState(s=>({...s,cells:{...s.cells,[key]:{status:"failed",answer:reveal?reveal.name:"—",attempts:3}}}));
+        setModal(null);
+      } else {
+        setState(s=>({...s,cells:{...s.cells,[key]:{...s.cells[key],attempts:newAttempts}}}));
+        setMsg(`❌ Wrong! ${3-newAttempts} attempt(s) left`);
+      }
+    }
+  }
+
+  const correct=Object.values(state.cells).filter(c=>c.status==="correct").length;
+  const mins=Math.floor(timer/60);const secs=timer%60;
+
+  return React.createElement("div",{className:"game-wrap"},
+    React.createElement("div",{className:"game-header"},
+      React.createElement("h2",null,"🔢 Football Grid"),
+      React.createElement("span",{className:"text-muted text-sm"},`Score: ${correct}/9  |  Time: ${mins}:${String(secs).padStart(2,"0")}`),
+      React.createElement("button",{className:"btn btn-outline",style:{marginLeft:"auto"},onClick:()=>{setState(initGrid());setDone(false);setTimer(0)}},`🔄 New Grid`),
+    ),
+    React.createElement("p",{className:"text-sm text-muted mb-2"},"Click a cell and name a player who played for BOTH clubs (row + column)."),
+    React.createElement("div",{style:{overflowX:"auto"}},
+      React.createElement("table",{className:"grid-table"},
+        React.createElement("thead",null,
+          React.createElement("tr",null,
+            React.createElement("th",null,""),
+            ...state.cols.map((c,i)=>React.createElement("th",{key:i},c))
+          )
+        ),
+        React.createElement("tbody",null,
+          state.rows.map((r,ri)=>React.createElement("tr",{key:ri},
+            React.createElement("th",null,r),
+            ...state.cols.map((_,ci)=>{
+              const cell=state.cells[`${ri},${ci}`];
+              return React.createElement("td",{key:ci,className:`grid-cell ${cell.status}`,onClick:()=>openCell(ri,ci)},
+                cell.status==="correct"&&React.createElement("div",null,React.createElement("div",null,"✅"),React.createElement("div",{style:{fontSize:10,marginTop:2}},cell.answer)),
+                cell.status==="failed"&&React.createElement("div",null,React.createElement("div",null,"❌"),React.createElement("div",{style:{fontSize:10,marginTop:2}},cell.answer)),
+                cell.status==="empty"&&React.createElement("div",null,
+                  React.createElement("div",{style:{fontSize:20}},"?"),
+                  cell.attempts>0&&React.createElement("div",{style:{fontSize:9,color:"#fbbf24"}},`${cell.attempts}/3`)
+                )
+              );
+            })
+          ))
+        )
+      )
+    ),
+    done&&React.createElement("div",{className:"result-modal mt-3"},
+      React.createElement("h2",null,"Grid Complete!"),
+      React.createElement("div",{className:"score-big"},`${correct}/9`),
+      React.createElement("p",{className:"text-muted mt-1"},`Time: ${mins}:${String(secs).padStart(2,"0")}  |  Points earned: ${correct*10}`),
+      React.createElement("button",{className:"btn btn-green mt-2",onClick:()=>{setState(initGrid());setDone(false);setTimer(0)}},"New Grid")
+    ),
+    modal&&React.createElement("div",{className:"modal-overlay"},
+      React.createElement("div",{className:"modal"},
+        React.createElement("h3",null,`${state.rows[modal.r]} × ${state.cols[modal.c]}`),
+        React.createElement("p",{className:"text-sm text-muted mb-2"},`Name a player who played for both clubs (attempt ${state.cells[`${modal.r},${modal.c}`].attempts+1}/3)`),
+        msg&&React.createElement("p",{style:{color:"#ef4444",fontSize:13,marginBottom:8}},msg),
+        React.createElement("input",{className:"",style:{width:"100%",background:"#071f15",border:"1px solid #2d5a3f",color:"#fff",padding:10,borderRadius:8,fontSize:14,fontFamily:"Inter,sans-serif",marginBottom:10},value:input,onChange:e=>setInput(e.target.value),onKeyDown:e=>e.key==="Enter"&&submitGuess(),placeholder:"e.g. Thierry Henry",autoFocus:true}),
+        React.createElement("div",{className:"modal-btns"},
+          React.createElement("button",{className:"btn btn-outline",onClick:()=>setModal(null)},"Cancel"),
+          React.createElement("button",{className:"btn btn-green",onClick:submitGuess},"Submit"),
+        )
+      )
+    )
+  );
+}
+
+// ─── DREAM 11 ───────────────────────────────────────────────────────────
+function Dream11({addPts}){
+  const[formation,setFormation]=useState("4-3-3");
+  const[selected,setSelected]=useState({GK:[],DEF:[],MID:[],FWD:[]});
+  const[captain,setCaptain]=useState(null);
+  const[vice,setVice]=useState(null);
+  const[filter,setFilter]=useState("ALL");
+  const[search,setSearch]=useState("");
+  const[result,setResult]=useState(null);
+
+  const budget=100;
+  const spent=Object.values(selected).flat().reduce((s,id)=>{const p=D11_PLAYERS.find(x=>x.id===id);return s+(p?p.price:0)},0);
+  const remaining=budget-spent;
+  const allSelected=Object.values(selected).flat();
+  const fm=FORMATIONS[formation];
+  const total=fm.gk+fm.def+fm.mid+fm.fwd;
+  const filled=allSelected.length;
+
+  function addPlayer(p){
+    const pos=p.pos;
+    const limit=fm[pos.toLowerCase()];
+    if(selected[pos].length>=limit)return;
+    if(allSelected.includes(p.id))return;
+    if(remaining<p.price)return;
+    setSelected(s=>({...s,[pos]:[...s[pos],p.id]}));
+  }
+
+  function removePlayer(pid){
+    const p=D11_PLAYERS.find(x=>x.id===pid);
+    setSelected(s=>({...s,[p.pos]:s[p.pos].filter(id=>id!==pid)}));
+    if(captain===pid)setCaptain(null);
+    if(vice===pid)setVice(null);
+  }
+
+  function calcScore(){
+    const players=allSelected.map(id=>D11_PLAYERS.find(p=>p.id===id));
+    let score=players.reduce((s,p)=>{
+      let pts=p.rat*(p.form/10);
+      if(p.id===captain)pts*=1.5;
+      if(p.id===vice)pts*=1.25;
+      return s+pts;
+    },0);
+    score=Math.round(score/players.length);
+    const capP=D11_PLAYERS.find(p=>p.id===captain);
+    if(capP&&capP.rat>=90)score=Math.min(100,score+10);
+    const gamesEarned=Math.round(score/2);
+    addPts(gamesEarned);
+    setResult({score,players,gamesEarned});
+  }
+
+  function randomTeam(){
+    const newSel={GK:[],DEF:[],MID:[],FWD:[]};
+    const taken=new Set();
+    const fill=(pos,count)=>{
+      const pool=D11_PLAYERS.filter(p=>p.pos===pos&&!taken.has(p.id));
+      const picks=shuffle(pool).slice(0,count);
+      picks.forEach(p=>{taken.add(p.id);newSel[pos].push(p.id)});
+    };
+    fill("GK",1);fill("DEF",fm.def);fill("MID",fm.mid);fill("FWD",fm.fwd);
+    setSelected(newSel);setCaptain(null);setVice(null);setResult(null);
+  }
+
+  function clearTeam(){setSelected({GK:[],DEF:[],MID:[],FWD:[]});setCaptain(null);setVice(null);setResult(null)}
+
+  const filtered=D11_PLAYERS.filter(p=>(filter==="ALL"||p.pos===filter)&&p.name.toLowerCase().includes(search.toLowerCase()));
+
+  const renderPitchRow=(pos)=>{
+    const count=fm[pos.toLowerCase()]||0;
+    const ids=selected[pos]||[];
+    return React.createElement("div",{className:"pitch-row"},
+      [...Array(count)].map((_,i)=>{
+        const pid=ids[i];
+        const pl=pid?D11_PLAYERS.find(p=>p.id===pid):null;
+        const isCap=pid===captain;const isVice=pid===vice;
+        return React.createElement("div",{key:i,className:`player-slot ${pl?"filled":""} ${isCap?"captain":""} ${isVice?"vice":""}`,onClick:()=>pl&&removePlayer(pl.id)},
+          React.createElement("div",{className:"slot-circle"},pl?pl.name[0]:"➕"),
+          pl&&React.createElement("div",{style:{display:"flex",gap:2,justifyContent:"center",marginBottom:2}},
+            React.createElement("button",{style:{fontSize:8,padding:"1px 3px",background:isCap?"#FFD700":"#071f15",color:isCap?"#1a3d2b":"#FFD700",border:"1px solid #FFD700",borderRadius:3,cursor:"pointer"},onClick:e=>{e.stopPropagation();setCaptain(pid===captain?null:pid);if(vice===pid)setVice(null)}},"C"),
+            React.createElement("button",{style:{fontSize:8,padding:"1px 3px",background:isVice?"#93c5fd":"#071f15",color:isVice?"#1a3d2b":"#93c5fd",border:"1px solid #93c5fd",borderRadius:3,cursor:"pointer"},onClick:e=>{e.stopPropagation();setVice(pid===vice?null:pid);if(captain===pid)setCaptain(null)}},"V"),
+          ),
+          React.createElement("div",{className:"slot-name"},pl?pl.name:pos),
+          React.createElement("div",{className:"slot-pos"},pl?pl.club:pos),
+        );
+      })
+    );
+  };
+
+  return React.createElement("div",{className:"game-wrap"},
+    React.createElement("div",{className:"game-header"},
+      React.createElement("h2",null,"⚽ Dream 11 Builder"),
+      React.createElement("span",{className:`text-sm fw-semi ${remaining<0?"text-red":"text-gold"}`},`Budget: ${remaining}/${budget} coins`),
+    ),
+    React.createElement("div",{className:"flex gap-2 mb-2 flex-wrap"},
+      React.createElement("select",{className:"game-select",value:formation,onChange:e=>{setFormation(e.target.value);clearTeam()}},
+        Object.keys(FORMATIONS).map(f=>React.createElement("option",{key:f,value:f},f))
+      ),
+      React.createElement("button",{className:"btn btn-outline",onClick:randomTeam},"🎲 Random"),
+      React.createElement("button",{className:"btn btn-red",onClick:clearTeam},"🗑 Clear"),
+      filled===total&&React.createElement("button",{className:"btn btn-gold",onClick:calcScore},"📊 Calculate Score"),
+    ),
+    React.createElement("div",{className:"grid-2"},
+      React.createElement("div",null,
+        React.createElement("div",{className:"pitch"},
+          renderPitchRow("FWD"),
+          renderPitchRow("MID"),
+          renderPitchRow("DEF"),
+          renderPitchRow("GK"),
+        ),
+        React.createElement("p",{className:"text-xs text-muted mt-1"},`${filled}/${total} players  •  Click player on pitch to remove  •  C=Captain(2x) V=Vice(1.5x)`)
+      ),
+      React.createElement("div",null,
+        React.createElement("div",{className:"flex gap-2 mb-2"},
+          ["ALL","GK","DEF","MID","FWD"].map(f=>React.createElement("button",{key:f,className:`btn ${filter===f?"btn-green":"btn-outline"}`,style:{padding:"4px 10px",fontSize:12},onClick:()=>setFilter(f)},f))
+        ),
+        React.createElement("input",{className:"game-input",style:{marginBottom:8},placeholder:"Search players...",value:search,onChange:e=>setSearch(e.target.value)}),
+        React.createElement("div",{className:"player-list"},
+          filtered.map(p=>{
+            const isSel=allSelected.includes(p.id);
+            const canAdd=!isSel&&selected[p.pos].length<(fm[p.pos.toLowerCase()]||0)&&remaining>=p.price;
+            return React.createElement("div",{key:p.id,className:`player-row ${isSel?"selected":""}`,onClick:()=>!isSel&&canAdd&&addPlayer(p)},
+              React.createElement("div",null,
+                React.createElement("div",{className:"player-info-name"},p.name),
+                React.createElement("div",{className:"player-info-meta"},`${p.pos} • ${p.club} • ⭐${p.rat} • Form:${p.form}`),
+              ),
+              React.createElement("div",{className:"player-price"},p.price+" 🪙"),
+            );
+          })
+        )
+      )
+    ),
+    result&&React.createElement("div",{className:"result-modal mt-3"},
+      React.createElement("h2",null,"Team Score"),
+      React.createElement("div",{className:"score-big"},result.score+"/100"),
+      React.createElement("p",{className:"text-muted mt-1"},`Points earned: ${result.gamesEarned}`),
+      React.createElement("div",{style:{marginTop:12}},
+        result.players.map(p=>React.createElement("div",{key:p.id,className:"info-row"},
+          React.createElement("span",null,`${p.id===captain?"👑 ":""}${p.id===vice?"🥈 ":""}${p.name}`),
+          React.createElement("span",{className:"text-gold"},`${p.rat} rat / ${p.form} form`)
+        ))
+      )
+    )
+  );
+}
+
+// ─── GUESS PLAYER ───────────────────────────────────────────────────────
+function GuessPlayer({addPts,streak,setStreak}){
+  const[pidx,setPidx]=useState(()=>Math.floor(Math.random()*PLAYERS_GUESS.length));
+  const[hintsShown,setHintsShown]=useState(1);
+  const[input,setInput]=useState("");
+  const[attempts,setAttempts]=useState(0);
+  const[status,setStatus]=useState("playing");// playing|won|lost
+  const[confetti,setConfetti]=useState(false);
+
+  const player=PLAYERS_GUESS[pidx];
+  const HINTS=[
+    `This player is a ${player.pos}`,
+    `This player is from ${player.nat}`,
+    `This player currently plays for ${player.club}`,
+    `This player is ${player.age} years old`,
+    `This player wears the number ${player.shirt} shirt`,
+    `${player.fact}`,
+  ];
+  const PTS_MAP=[60,50,40,30,20,10];
+
+  function guess(){
+    if(!input.trim())return;
+    const g=input.trim().toLowerCase();
+    const correct=player.name.toLowerCase().split(" ").some(w=>g.includes(w)||w.includes(g))||player.name.toLowerCase().includes(g);
+    if(correct){
+      addPts(PTS_MAP[attempts]);
+      setStreak(s=>s+1);
+      setStatus("won");setConfetti(true);
+      setTimeout(()=>setConfetti(false),2000);
+    } else {
+      const newAtt=attempts+1;
+      setAttempts(newAtt);
+      if(newAtt>=6){setStatus("lost");setStreak(0);}
+      else setHintsShown(Math.min(newAtt+1,6));
+    }
+    setInput("");
+  }
+
+  function next(){
+    const newIdx=(pidx+1)%PLAYERS_GUESS.length;
+    setPidx(newIdx);setHintsShown(1);setInput("");setAttempts(0);setStatus("playing");
+  }
+
+  return React.createElement("div",{className:"game-wrap"},
+    confetti&&React.createElement("div",{style:{position:"fixed",inset:0,pointerEvents:"none",zIndex:999,overflow:"hidden"}},
+      [...Array(30)].map((_,i)=>React.createElement("div",{key:i,className:"confetti-piece",style:{left:`${Math.random()*100}%`,top:"-10px",background:["#FFD700","#22c55e","#ef4444","#60a5fa","#f472b6"][i%5],borderRadius:i%3?"50%":"0",animationDelay:`${Math.random()*0.5}s`,animationDuration:`${1+Math.random()}s`}}))
+    ),
+    React.createElement("div",{className:"game-header"},
+      React.createElement("h2",null,"🤔 Guess the Player"),
+      React.createElement("span",{className:"text-sm text-muted"},`Attempt ${Math.min(attempts+1,6)}/6  •  Streak: ${streak}`),
+    ),
+    React.createElement("div",{style:{marginBottom:12}},
+      HINTS.slice(0,hintsShown).map((h,i)=>React.createElement("div",{key:i,className:"hint-card"},
+        React.createElement("div",{className:"hint-num"},i+1),
+        React.createElement("div",{className:"hint-text"},h)
+      ))
+    ),
+    status==="playing"&&React.createElement("div",null,
+      React.createElement("input",{className:"game-input",value:input,onChange:e=>setInput(e.target.value),onKeyDown:e=>e.key==="Enter"&&guess(),placeholder:"Enter player name...",autoFocus:true}),
+      React.createElement("button",{className:"btn btn-green",onClick:guess},"Submit Guess"),
+    ),
+    status==="won"&&React.createElement("div",{className:"result-modal"},
+      React.createElement("h2",null,"🎉 Correct!"),
+      React.createElement("div",{className:"score-big"},`+${PTS_MAP[attempts]} pts`),
+      React.createElement("p",{className:"text-muted mt-1"},`You guessed ${player.name} in ${attempts+1} attempt(s)!`),
+      React.createElement("p",{style:{marginTop:8,fontSize:13}},player.fact),
+      React.createElement("button",{className:"btn btn-green mt-2",onClick:next},"Next Player →"),
+    ),
+    status==="lost"&&React.createElement("div",{className:"result-modal"},
+      React.createElement("h2",{style:{color:"#ef4444"}},"😔 Out of attempts!"),
+      React.createElement("p",{className:"text-gold text-xl fw-bold mt-1"},player.name),
+      React.createElement("p",{style:{fontSize:13,marginTop:8}},player.fact),
+      React.createElement("button",{className:"btn btn-green mt-2",onClick:next},"Next Player →"),
+    ),
+  );
+}
+
+// ─── GUESS TEAM ──────────────────────────────────────────────────────────
+function GuessTeam({addPts}){
+  const[tidx,setTidx]=useState(()=>Math.floor(Math.random()*TEAMS_GUESS.length));
+  const[hintsShown,setHintsShown]=useState(1);
+  const[input,setInput]=useState("");
+  const[attempts,setAttempts]=useState(0);
+  const[status,setStatus]=useState("playing");
+  const[history,setHistory]=useState([]);
+
+  const team=TEAMS_GUESS[tidx];
+  const blur=Math.max(0,20-hintsShown*3.5);
+  const HINTS=[
+    `This club plays in ${team.country} in the ${team.league}`,
+    `Founded in ${team.founded}, they play at ${team.stadium}`,
+    `Their stadium holds approximately ${team.cap.toLocaleString()} fans`,
+    `They play in ${team.colors}`,
+    `They are known as "${team.nick}"`,
+    `Legends include: ${team.legends.join(", ")}`,
+  ];
+  const PTS_MAP=[60,50,40,30,20,10];
+
+  function guess(){
+    if(!input.trim())return;
+    const g=input.trim().toLowerCase();
+    const match=[team.name,...team.alts].some(n=>n.toLowerCase()===g||g.includes(n.toLowerCase().slice(0,4)));
+    if(match){
+      const pts=PTS_MAP[attempts];
+      addPts(pts);
+      setHistory(h=>[{team:team.name,pts,result:"✅"},...h.slice(0,4)]);
+      setStatus("won");
+    } else {
+      const newAtt=attempts+1;
+      setAttempts(newAtt);
+      if(newAtt>=6){
+        setHistory(h=>[{team:team.name,pts:0,result:"❌"},...h.slice(0,4)]);
+        setStatus("lost");
+      } else setHintsShown(Math.min(newAtt+1,6));
+    }
+    setInput("");
+  }
+
+  function next(){
+    const ni=(tidx+1)%TEAMS_GUESS.length;
+    setTidx(ni);setHintsShown(1);setInput("");setAttempts(0);setStatus("playing");
+  }
+
+  // Simple SVG crest
+  function Crest({team,blur}){
+    return React.createElement("div",{className:"crest-wrap"},
+      React.createElement("svg",{width:100,height:100,style:{filter:`blur(${blur}px)`,transition:"filter 1s",borderRadius:8}},
+        React.createElement("rect",{width:100,height:100,fill:team.color||"#1a3d2b",rx:8}),
+        React.createElement("text",{x:50,y:40,textAnchor:"middle",fill:"white",fontSize:12,fontFamily:"Oswald",fontWeight:700},team.name.split(" ").slice(0,2).join("\n")),
+        React.createElement("text",{x:50,y:58,textAnchor:"middle",fill:"rgba(255,255,255,0.8)",fontSize:16,fontFamily:"Oswald"},team.name.slice(0,3).toUpperCase()),
+        React.createElement("text",{x:50,y:78,textAnchor:"middle",fill:"rgba(255,255,255,0.6)",fontSize:10},team.founded),
+      )
+    );
+  }
+
+  return React.createElement("div",{className:"game-wrap"},
+    React.createElement("div",{className:"game-header"},
+      React.createElement("h2",null,"🛡️ Guess the Team"),
+      React.createElement("span",{className:"text-sm text-muted"},`Attempt ${Math.min(attempts+1,6)}/6`),
+    ),
+    React.createElement(Crest,{team,blur}),
+    React.createElement("div",{style:{marginBottom:12}},
+      HINTS.slice(0,hintsShown).map((h,i)=>React.createElement("div",{key:i,className:"hint-card"},
+        React.createElement("div",{className:"hint-num"},i+1),
+        React.createElement("div",{className:"hint-text"},h)
+      ))
+    ),
+    status==="playing"&&React.createElement("div",null,
+      React.createElement("input",{className:"game-input",value:input,onChange:e=>setInput(e.target.value),onKeyDown:e=>e.key==="Enter"&&guess(),placeholder:"Enter team name...",autoFocus:true}),
+      React.createElement("button",{className:"btn btn-green",onClick:guess},"Submit Guess"),
+    ),
+    status==="won"&&React.createElement("div",{className:"result-modal"},
+      React.createElement("h2",null,"✅ Correct!"),
+      React.createElement("div",{className:"score-big"},`+${PTS_MAP[attempts]} pts`),
+      React.createElement("p",{className:"text-gold fw-bold"},team.name),
+      React.createElement("p",{className:"text-muted text-sm mt-1"},team.history),
+      React.createElement("div",{style:{marginTop:8}},
+        React.createElement("div",{className:"info-row"},React.createElement("span",null,"League titles"),React.createElement("span",{className:"text-gold"},team.titles.league)),
+        React.createElement("div",{className:"info-row"},React.createElement("span",null,"Founded"),React.createElement("span",{className:"text-gold"},team.founded)),
+      ),
+      React.createElement("button",{className:"btn btn-green mt-2",onClick:next},"Next Club →"),
+    ),
+    status==="lost"&&React.createElement("div",{className:"result-modal"},
+      React.createElement("h2",{style:{color:"#ef4444"}},"❌ Out of attempts!"),
+      React.createElement("p",{className:"text-gold text-xl fw-bold"},team.name),
+      React.createElement("p",{className:"text-muted text-sm mt-1"},team.history),
+      React.createElement("button",{className:"btn btn-green mt-2",onClick:next},"Next Club →"),
+    ),
+    history.length>0&&React.createElement("div",{style:{marginTop:12}},
+      React.createElement("h3",{style:{fontSize:14,color:"#86efac",marginBottom:6}},"Recent Rounds"),
+      history.map((h,i)=>React.createElement("div",{key:i,className:"lb-row"},
+        React.createElement("span",{className:"text-sm"},h.result),
+        React.createElement("span",{className:"lb-name"},h.team),
+        React.createElement("span",{className:"lb-pts"},h.pts+" pts"),
+      ))
+    )
+  );
+}
+
+// ─── QUIZ ────────────────────────────────────────────────────────────────
+function Quiz({addPts}){
+  const[phase,setPhase]=useState("setup");// setup|playing|end
+  const[cat,setCat]=useState("All");
+  const[diff,setDiff]=useState("All");
+  const[numQ,setNumQ]=useState(10);
+  const[questions,setQuestions]=useState([]);
+  const[qi,setQi]=useState(0);
+  const[score,setScore]=useState(0);
+  const[selected,setSelected]=useState(null);
+  const[timerPct,setTimerPct]=useState(100);
+  const[answered,setAnswered]=useState(false);
+  const[lifelines,setLifelines]=useState({half:true,skip:true});
+  const[eliminated,setEliminated]=useState([]);
+  const[explanation,setExplanation]=useState(false);
+  const timerRef=useRef(null);
+  const startRef=useRef(0);
+
+  const CATS=["All",...new Set(QUIZ_QUESTIONS.map(q=>q.cat))];
+  const DIFFS=["All","Easy","Medium","Hard"];
+  const TIME={Easy:15,Medium:12,Hard:10};
+
+  function start(){
+    let pool=QUIZ_QUESTIONS.filter(q=>(cat==="All"||q.cat===cat)&&(diff==="All"||q.diff===diff));
+    if(pool.length<numQ)pool=[...pool,...QUIZ_QUESTIONS.filter(q=>!pool.includes(q))];
+    const qs=shuffle(pool).slice(0,numQ);
+    setQuestions(qs);setQi(0);setScore(0);setPhase("playing");setSelected(null);setAnswered(false);setLifelines({half:true,skip:true});setEliminated([]);
+  }
+
+  const cq=questions[qi];
+  const maxTime=cq?TIME[cq.diff]||12:12;
+
+  useEffect(()=>{
+    if(phase!=="playing"||answered||!cq)return;
+    startRef.current=Date.now();
+    setTimerPct(100);setEliminated([]);
+    timerRef.current=setInterval(()=>{
+      const elapsed=(Date.now()-startRef.current)/1000;
+      const pct=Math.max(0,100-(elapsed/maxTime)*100);
+      setTimerPct(pct);
+      if(pct<=0){
+        clearInterval(timerRef.current);
+        handleAnswer(-1,true);
+      }
+    },100);
+    return()=>clearInterval(timerRef.current);
+  },[qi,phase,answered]);
+
+  function handleAnswer(idx,timedOut=false){
+    if(answered)return;
+    clearInterval(timerRef.current);
+    setAnswered(true);setSelected(idx);setExplanation(true);
+    const elapsed=(Date.now()-startRef.current)/1000;
+    if(idx===cq.a){
+      const base={Easy:5,Medium:10,Hard:20}[cq.diff]||5;
+      const bonus=elapsed<3?5:0;
+      setScore(s=>s+base+bonus);
+    }
+    setTimeout(()=>{
+      setExplanation(false);
+      const next=qi+1;
+      if(next>=questions.length){
+        setPhase("end");
+      } else {
+        setQi(next);setSelected(null);setAnswered(false);setEliminated([]);
+      }
+    },2000);
+  }
+
+  function useHalf(){
+    if(!lifelines.half||answered)return;
+    const wrongs=[0,1,2,3].filter(i=>i!==cq.a);
+    const elim=shuffle(wrongs).slice(0,2);
+    setEliminated(elim);
+    setLifelines(l=>({...l,half:false}));
+  }
+
+  function useSkip(){
+    if(!lifelines.skip||answered)return;
+    setLifelines(l=>({...l,skip:false}));
+    const next=qi+1;
+    if(next>=questions.length){setPhase("end");}
+    else{setQi(next);setSelected(null);setAnswered(false);setEliminated([]);}
+  }
+
+  function optClass(i){
+    if(!answered)return"quiz-opt";
+    if(i===cq.a)return"quiz-opt correct";
+    if(i===selected&&i!==cq.a)return"quiz-opt wrong";
+    return"quiz-opt";
+  }
+
+  if(phase==="setup")return React.createElement("div",{className:"game-wrap"},
+    React.createElement("div",{className:"game-header"},React.createElement("h2",null,"🧠 Football Quiz")),
+    React.createElement("div",{className:"bg-card rounded-lg p-3",style:{maxWidth:500}},
+      React.createElement("p",{className:"text-sm text-muted mb-2"},"Category"),
+      React.createElement("div",{className:"flex gap-2 flex-wrap mb-3"},
+        CATS.map(c=>React.createElement("button",{key:c,className:`btn ${cat===c?"btn-green":"btn-outline"}`,style:{padding:"5px 12px",fontSize:12},onClick:()=>setCat(c)},c))
+      ),
+      React.createElement("p",{className:"text-sm text-muted mb-2"},"Difficulty"),
+      React.createElement("div",{className:"flex gap-2 mb-3"},
+        DIFFS.map(d=>React.createElement("button",{key:d,className:`btn ${diff===d?"btn-green":"btn-outline"}`,style:{padding:"5px 12px",fontSize:12},onClick:()=>setDiff(d)},d))
+      ),
+      React.createElement("p",{className:"text-sm text-muted mb-2"},"Questions"),
+      React.createElement("div",{className:"flex gap-2 mb-3"},
+        [5,10,15,20].map(n=>React.createElement("button",{key:n,className:`btn ${numQ===n?"btn-gold":"btn-outline"}`,style:{padding:"5px 12px",fontSize:12},onClick:()=>setNumQ(n)},n))
+      ),
+      React.createElement("button",{className:"btn btn-green w-full",style:{padding:"12px"},onClick:start},"🚀 Start Quiz"),
+    )
+  );
+
+  if(phase==="end"){
+    const pct=Math.round((score/((questions.reduce((s,q)=>s+({Easy:5,Medium:10,Hard:20}[q.diff]||5),0)||1)))*100);
+    const rating=pct>=95?"Football Legend 🏆":pct>=80?"Professional ⭐":pct>=60?"Semi-Pro 💪":pct>=40?"Amateur 👍":"Beginner 🌱";
+    return React.createElement("div",{className:"game-wrap"},
+      React.createElement("div",{className:"result-modal"},
+        React.createElement("h2",null,"Quiz Complete!"),
+        React.createElement("div",{className:"score-big"},score+" pts"),
+        React.createElement("p",{className:"text-gold fw-bold mt-1"},rating),
+        React.createElement("p",{className:"text-muted text-sm"},`${pct}% accuracy across ${questions.length} questions`),
+        React.createElement("button",{className:"btn btn-green mt-2",onClick:()=>{setPhase("setup")}},"Play Again"),
+      )
+    );
+  }
+
+  return React.createElement("div",{className:"game-wrap"},
+    React.createElement("div",{className:"game-header"},
+      React.createElement("h2",null,"🧠 Football Quiz"),
+      React.createElement("span",{className:"text-sm text-muted"},`Q ${qi+1}/${questions.length}`),
+      React.createElement("span",{className:"text-gold text-sm fw-semi",style:{marginLeft:"auto"}},score+" pts"),
+    ),
+    cq&&React.createElement("div",null,
+      React.createElement("div",{className:"flex gap-2 mb-2 items-center"},
+        React.createElement("span",{className:`badge badge-${cq.diff.toLowerCase()}`},cq.diff),
+        React.createElement("span",{className:"badge badge-cat"},cq.cat),
+        React.createElement("span",{style:{marginLeft:"auto",display:"flex",gap:6}},
+          React.createElement("button",{className:`btn ${lifelines.half?"btn-outline":""}`,style:{padding:"3px 10px",fontSize:11},onClick:useHalf,disabled:!lifelines.half||answered},"50/50"),
+          React.createElement("button",{className:`btn ${lifelines.skip?"btn-outline":""}`,style:{padding:"3px 10px",fontSize:11},onClick:useSkip,disabled:!lifelines.skip||answered},"Skip"),
+        )
+      ),
+      React.createElement("div",{className:"timer-bar-wrap"},
+        React.createElement("div",{className:"timer-bar",style:{width:`${timerPct}%`,background:timerPct>40?"#22c55e":timerPct>15?"#fbbf24":"#ef4444"}})
+      ),
+      React.createElement("p",{style:{fontSize:16,fontWeight:600,marginBottom:14,lineHeight:1.5}},cq.q),
+      cq.opts.map((o,i)=>React.createElement("button",{key:i,className:optClass(i),disabled:answered||eliminated.includes(i),onClick:()=>handleAnswer(i),style:{opacity:eliminated.includes(i)?0.2:1}},
+        `${["A","B","C","D"][i]}. ${o}`
+      )),
+      explanation&&cq&&React.createElement("div",{style:{background:"#071f15",borderRadius:8,padding:"10px 12px",marginTop:8,fontSize:13,color:"#86efac",borderLeft:"3px solid #22c55e"}},
+        `💡 ${cq.exp}`
+      )
+    )
+  );
+}
+
+// ─── TRANSFER GAME ────────────────────────────────────────────────────────
+function TransferGame({addPts}){
+  const[tidx,setTidx]=useState(()=>Math.floor(Math.random()*TRANSFER_CHAINS.length));
+  const[attempts,setAttempts]=useState(0);
+  const[input,setInput]=useState("");
+  const[status,setStatus]=useState("playing");
+  const[revealed,setRevealed]=useState(0);
+
+  const chain=TRANSFER_CHAINS[tidx];
+  const clubs=chain.clubs;
+  const hideFrom=Math.max(clubs.length-2,0);
+
+  function guess(){
+    if(!input.trim())return;
+    const g=input.trim().toLowerCase();
+    const correct=chain.player.toLowerCase().split(" ").some(w=>g.includes(w)||w.includes(g))||chain.player.toLowerCase().includes(g);
+    if(correct){addPts(30);setStatus("won");}
+    else{
+      const na=attempts+1;
+      setAttempts(na);
+      if(na>=3){setStatus("lost");}
+      else setRevealed(r=>Math.min(r+1,2));
+    }
+    setInput("");
+  }
+
+  function next(){
+    const ni=(tidx+1)%TRANSFER_CHAINS.length;
+    setTidx(ni);setAttempts(0);setInput("");setStatus("playing");setRevealed(0);
+  }
+
+  const visibleHideFrom=hideFrom-revealed;
+
+  return React.createElement("div",{className:"game-wrap"},
+    React.createElement("div",{className:"game-header"},
+      React.createElement("h2",null,"✈️ Transfer Puzzle"),
+      React.createElement("span",{className:"text-sm text-muted"},`Attempt ${attempts+1}/3  •  ${chain.diff}`),
+    ),
+    React.createElement("p",{className:"text-sm text-muted mb-2"},"Which player followed this transfer path?"),
+    React.createElement("div",{className:"transfer-chain"},
+      clubs.map((c,i)=>React.createElement(React.Fragment,{key:i},
+        i>0&&React.createElement("span",{className:"transfer-arrow"},"→"),
+        React.createElement("div",{className:`transfer-club ${i>=visibleHideFrom&&status==="playing"?"hidden":""}`},
+          i>=visibleHideFrom&&status==="playing"?`??? (${c.y})`:React.createElement("span",null,React.createElement("strong",null,c.c),React.createElement("span",{style:{fontSize:10,color:"#86efac",marginLeft:4}},c.y))
+        )
+      ))
+    ),
+    status==="playing"&&React.createElement("div",{className:"mt-2"},
+      React.createElement("input",{className:"game-input",value:input,onChange:e=>setInput(e.target.value),onKeyDown:e=>e.key==="Enter"&&guess(),placeholder:"Name the player...",autoFocus:true}),
+      React.createElement("button",{className:"btn btn-green",onClick:guess},"Submit"),
+    ),
+    status==="won"&&React.createElement("div",{className:"result-modal"},
+      React.createElement("h2",null,"✅ Correct!"),
+      React.createElement("div",{className:"score-big"},"+30 pts"),
+      React.createElement("p",{className:"text-gold fw-bold mt-1"},chain.player),
+      React.createElement("button",{className:"btn btn-green mt-2",onClick:next},"Next Puzzle →"),
+    ),
+    status==="lost"&&React.createElement("div",{className:"result-modal"},
+      React.createElement("h2",{style:{color:"#ef4444"}},"❌ The answer was:"),
+      React.createElement("p",{className:"text-gold text-xl fw-bold"},chain.player),
+      React.createElement("button",{className:"btn btn-green mt-2",onClick:next},"Next Puzzle →"),
+    ),
+  );
+}
+
+// ─── MOUNT ─────────────────────────────────────────────────────────────
+const root=ReactDOM.createRoot(document.getElementById("root"));
+root.render(React.createElement(App));
+</script>
+</body>
+</html>
